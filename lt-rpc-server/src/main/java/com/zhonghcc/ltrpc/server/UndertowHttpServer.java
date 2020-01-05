@@ -81,6 +81,7 @@ public class UndertowHttpServer implements LtRpcServer{
                             exchange.dispatch(this);
                             return;
                         }
+                        exchange.getRequestHeaders().
                         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
                         exchange.getResponseSender().send("Hello World");
                         log.info("done {}", i);
