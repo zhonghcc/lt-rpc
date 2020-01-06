@@ -5,5 +5,7 @@ import lombok.Data;
 @Data
 public class LtRpcResponse {
     String traceId;
-    Object data;
+    boolean success;
+    String msg;
+    byte[] data;
 }

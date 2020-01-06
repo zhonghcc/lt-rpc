@@ -8,5 +8,5 @@ public class LtRpcRequest {
     String traceId;
     String authSign;
     String authId;
-    Object data;
+    byte[] data;
 }
