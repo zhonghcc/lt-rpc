@@ -1,12 +1,15 @@
 package com.zhonghcc.ltrpc.server;
 
 import com.google.common.base.Throwables;
+import com.zhonghcc.ltrpc.protocal.*;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.protocol.http.HttpOpenListener;
+import io.undertow.util.HeaderMap;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,22 +41,24 @@ public class UndertowHttpServer implements LtRpcServer{
     private int ioThreadNum;
     private int workerNum;
     private int timeout;
+    private LtRpcProcessor processor;
 
     @Tolerate
-    private UndertowHttpServer() {
+    private UndertowHttpServer(LtRpcProcessor processor) {
 
     }
     @Tolerate
-    public UndertowHttpServer(int port){
+    public UndertowHttpServer(int port,LtRpcProcessor processor){
         this(port,DEFAULT_HOST);
     }
     @Tolerate
-    public UndertowHttpServer(int port,String host){
+    public UndertowHttpServer(int port,String host,LtRpcProcessor processor){
         this.port = port;
         this.host = host;
         this.ioThreadNum = DEFAULT_IO_NUM;
         this.workerNum = DEFAULT_WORKER_NUM;
         this.timeout = DEFAULT_TIMEOUT;
+        this.processor = processor;
 
     }
 
@@ -81,8 +86,18 @@ public class UndertowHttpServer implements LtRpcServer{
                             exchange.dispatch(this);
                             return;
                         }
-                        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-                        exchange.getResponseSender().send("Hello World");
+                        LtRpcRequest ltRpcRequest = new LtRpcRequest();
+                        HeaderMap headerMap = exchange.getRequestHeaders();
+                        String methodName = headerMap.getFirst(LtRpcMessage.FIELD_METHOD_NAME);
+                        String traceId = headerMap.getFirst(LtRpcMessage.FIELD_TRACE_ID);
+                        ltRpcRequest.setMethodName(methodName);
+                        ltRpcRequest.setTraceId(traceId);
+                        LtRpcResponse ltRpcResponse = processor.processRpc(ltRpcRequest);
+                        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/ltrpc");
+                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_TRACE_ID),ltRpcResponse.getTraceId());
+                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_MSG),ltRpcResponse.getMsg());
+                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_SUCCESS),String.valueOf(ltRpcResponse.isSuccess()));
+                        exchange.getResponseSender().send(ByteBuffer.wrap(ltRpcResponse.getData()));
                         log.info("done {}", i);
                     }
                 }
@@ -135,7 +150,16 @@ public class UndertowHttpServer implements LtRpcServer{
 //        }
 //    }
     public static void main(final String[] args) {
-        LtRpcServer ltRpcServer = new UndertowHttpServer(8080);
+
+        class ServerProxyImpl{
+            public String test(String a){
+                log.info("call test {}",a);
+                return "echo "+a;
+            }
+        }
+        LtRpcProcessor processor = new LtRpcProtostuffProcessor();
+        processor.injectServerImpl(new ServerProxyImpl());
+        LtRpcServer ltRpcServer = new UndertowHttpServer(8080,processor);
         ltRpcServer.start();
     }
 }
