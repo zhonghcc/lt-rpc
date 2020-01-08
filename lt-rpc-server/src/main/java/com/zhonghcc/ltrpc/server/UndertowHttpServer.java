@@ -49,7 +49,7 @@ public class UndertowHttpServer implements LtRpcServer{
     }
     @Tolerate
     public UndertowHttpServer(int port,LtRpcProcessor processor){
-        this(port,DEFAULT_HOST);
+        this(port,DEFAULT_HOST,processor);
     }
     @Tolerate
     public UndertowHttpServer(int port,String host,LtRpcProcessor processor){
@@ -151,15 +151,6 @@ public class UndertowHttpServer implements LtRpcServer{
 //    }
     public static void main(final String[] args) {
 
-        class ServerProxyImpl{
-            public String test(String a){
-                log.info("call test {}",a);
-                return "echo "+a;
-            }
-        }
-        LtRpcProcessor processor = new LtRpcProtostuffProcessor();
-        processor.injectServerImpl(new ServerProxyImpl());
-        LtRpcServer ltRpcServer = new UndertowHttpServer(8080,processor);
-        ltRpcServer.start();
+
     }
 }

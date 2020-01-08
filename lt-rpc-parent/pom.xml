@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>lt-rpc-parent</artifactId>
+    <packaging>pom</packaging>
 
     <properties>
         <logback.version>1.2.3</logback.version>

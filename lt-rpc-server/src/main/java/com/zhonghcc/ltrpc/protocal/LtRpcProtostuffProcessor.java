@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class LtRpcProtostuffProcessor extends LtRpcProcessor{
+public class LtRpcProtostuffProcessor implements LtRpcProcessor{
 
     Object proxy;
     private static Map<String,Method> methodMap = new HashMap<>();
@@ -77,7 +77,6 @@ public class LtRpcProtostuffProcessor extends LtRpcProcessor{
             log.error("未实现Server函数 {}",methodName);
             throw new IllegalArgumentException("未实现Server函数 "+methodName);
         }
-        return null;
     }
 
     public static <T> byte[] serialize(T obj, Class<T> clazz) {
