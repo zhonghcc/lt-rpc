@@ -46,6 +46,9 @@ public class OkHttpSender implements LtRpcSender {
             return rpcResponse;
         }
     }
+    public static void main(String[] args){
+        System.out.println(1);
+    }
 }
 
 

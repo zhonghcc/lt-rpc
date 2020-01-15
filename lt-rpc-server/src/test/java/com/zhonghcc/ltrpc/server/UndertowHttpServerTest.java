@@ -22,5 +22,12 @@ public class UndertowHttpServerTest {
         processor.injectServerImpl(new ServerProxyImpl());
         LtRpcServer ltRpcServer = new UndertowHttpServer(8080,processor);
         ltRpcServer.start();
+        while(true){
+            try {
+                Thread.sleep(50000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -59,6 +59,7 @@ public class LtRpcProtostuffProcessor implements LtRpcProcessor{
             Schema responseSchema = getSchema(responseType);
             byte[] paramData = request.getData();
             Object paramObj = deserialize(paramData,paramType);
+            method.setAccessible(true);
             try {
                 Object responseObj = method.invoke(this.proxy, paramObj);
                 byte[] responseData = serialize(responseObj,responseType);

@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.zhonghcc.ltrpc.protocal.*;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
+import io.undertow.connector.ByteBufferPool;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.protocol.http.HttpOpenListener;
@@ -86,12 +87,19 @@ public class UndertowHttpServer implements LtRpcServer{
                             exchange.dispatch(this);
                             return;
                         }
+                        ByteBufferPool byteBufferPool = exchange.getConnection().getByteBufferPool();
+                        ByteBuffer byteBuffer = byteBufferPool.allocate().getBuffer();
+                        int pos = byteBuffer.position();
                         LtRpcRequest ltRpcRequest = new LtRpcRequest();
                         HeaderMap headerMap = exchange.getRequestHeaders();
                         String methodName = headerMap.getFirst(LtRpcMessage.FIELD_METHOD_NAME);
                         String traceId = headerMap.getFirst(LtRpcMessage.FIELD_TRACE_ID);
                         ltRpcRequest.setMethodName(methodName);
                         ltRpcRequest.setTraceId(traceId);
+                        exchange.getRequestChannel().read(byteBuffer);
+                        byte[] requestData = new byte[pos];
+                        byteBuffer.get(requestData);
+                        ltRpcRequest.setData(requestData);
                         LtRpcResponse ltRpcResponse = processor.processRpc(ltRpcRequest);
                         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/ltrpc");
                         exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_TRACE_ID),ltRpcResponse.getTraceId());
