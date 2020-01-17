@@ -1,6 +1,7 @@
 package com.zhonghcc.ltrpc.protocal;
 
 import com.google.common.base.Throwables;
+import com.zhonghcc.ltrpc.protocal.serializer.LtRpcSerializer;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import io.protostuff.ProtostuffIOUtil;
@@ -20,10 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LtRpcProtostuffProcessor implements LtRpcProcessor{
 
     Object proxy;
+    LtRpcSerializer serializer;
     private static Map<String,Method> methodMap = new HashMap<>();
 
-    private static Map<Class<?>, Schema<?>> schemaCache = new ConcurrentHashMap<>();
-    private static LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+
+
 
     @Override
     public void injectServerImpl(Object proxy) {
@@ -46,6 +48,11 @@ public class LtRpcProtostuffProcessor implements LtRpcProcessor{
     }
 
     @Override
+    public void injectSerializer(LtRpcSerializer serializer) {
+        this.serializer = serializer;
+    }
+
+    @Override
     public LtRpcResponse processRpc(LtRpcRequest request) {
         String methodName = request.getMethodName();
         //TODO auth
@@ -55,14 +62,12 @@ public class LtRpcProtostuffProcessor implements LtRpcProcessor{
             Method method = methodMap.get(methodName);
             Class paramType = method.getParameterTypes()[0];
             Class responseType = method.getReturnType();
-            Schema paramSchema = getSchema(paramType);
-            Schema responseSchema = getSchema(responseType);
-            byte[] paramData = request.getData();
-            Object paramObj = deserialize(paramData,paramType);
+
+            Object paramObj = serializer.deserialize(request.getData(),paramType);
             method.setAccessible(true);
             try {
                 Object responseObj = method.invoke(this.proxy, paramObj);
-                byte[] responseData = serialize(responseObj,responseType);
+                byte[] responseData = serializer.serialize(responseObj,responseType);
                 LtRpcResponse ltRpcResponse = new LtRpcResponse();
                 ltRpcResponse.setSuccess(true);
                 ltRpcResponse.setMsg("success");
@@ -80,37 +85,5 @@ public class LtRpcProtostuffProcessor implements LtRpcProcessor{
         }
     }
 
-    public static <T> byte[] serialize(T obj, Class<T> clazz) {
-        Schema<T> schema = getSchema(clazz);
-        byte[] data;
-        try {
-            data = ProtostuffIOUtil.toByteArray(obj, schema, buffer);
-        } finally {
-            buffer.clear();
-        }
 
-        return data;
-    }
-
-    public static <T> T deserialize(byte[] data, Class<T> clazz) {
-        Schema<T> schema = getSchema(clazz);
-        T obj = schema.newMessage();
-        ProtostuffIOUtil.mergeFrom(data, obj, schema);
-        return obj;
-    }
-
-
-    private static <T> Schema<T> getSchema(Class<T> clazz) {
-        Schema<T> schema = (Schema<T>) schemaCache.get(clazz);
-        if (Objects.isNull(schema)) {
-            //这个schema通过RuntimeSchema进行懒创建并缓存
-            //所以可以一直调用RuntimeSchema.getSchema(),这个方法是线程安全的
-            schema = RuntimeSchema.getSchema(clazz);
-            if (Objects.nonNull(schema)) {
-                schemaCache.put(clazz, schema);
-            }
-        }
-
-        return schema;
-    }
 }
