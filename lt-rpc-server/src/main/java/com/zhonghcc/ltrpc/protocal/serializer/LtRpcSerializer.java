@@ -8,4 +8,6 @@ public interface LtRpcSerializer {
     public <T> byte[] serialize(T obj, Class<T> clazz);
 
     public <T> T deserialize(byte[] data, Class<T> clazz);
+
+
 }

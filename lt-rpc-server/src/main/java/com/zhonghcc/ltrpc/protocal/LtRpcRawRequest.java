@@ -3,11 +3,10 @@ package com.zhonghcc.ltrpc.protocal;
 import lombok.Data;
 
 @Data
-public class LtRpcRequest {
+public class LtRpcRawRequest {
     String methodName;
     String traceId;
     String authSign;
     String authId;
-    Object data;
-    Class dataClass;
+    byte[] data;
 }
