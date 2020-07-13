@@ -20,8 +20,9 @@ public class OkHttpSenderTest {
         request.setAuthId("");
         request.setAuthSign("");
         String str = "Say Hello!";
-        byte[] data = LtRpcProtostuffProcessor.serialize(str,String.class );
-        request.setData(data);
+
+        request.setData(str);
+        request.setDataClass(String.class);
         System.out.println(request);
         LtRpcNode mockNode = new LtRpcNode();
         mockNode.setHost("localhost");

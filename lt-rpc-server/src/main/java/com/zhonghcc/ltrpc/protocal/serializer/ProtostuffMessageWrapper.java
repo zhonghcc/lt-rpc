@@ -11,12 +11,13 @@ public class ProtostuffMessageWrapper implements LtRpcMessageWrapper{
 
     @Override
     public LtRpcRawRequest serialize(LtRpcRequest request) {
-        LtRpcRawRequest result = new LtRpcRawRequest();
-        result.setAuthId(request.getAuthId());
-        result.setAuthSign(request.getAuthSign());
-        result.setMethodName(request.getMethodName());
-        result.setTraceId(request.getTraceId());
-        result.setData(serializer.serialize(request.getData(),request.getDataClass()));
+        LtRpcRawRequest result = LtRpcRawRequest.builder()
+            .authId(request.getAuthId())
+            .authSign(request.getAuthSign())
+            .methodName(request.getMethodName())
+            .traceId(request.getTraceId())
+            .data(serializer.serialize(request.getData(),request.getDataClass()))
+            .build();
         return result;
     }
 
