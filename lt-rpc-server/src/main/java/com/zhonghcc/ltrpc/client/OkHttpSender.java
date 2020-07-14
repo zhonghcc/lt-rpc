@@ -1,10 +1,7 @@
 package com.zhonghcc.ltrpc.client;
 
 import com.google.common.base.Throwables;
-import com.zhonghcc.ltrpc.protocal.LtRpcMessage;
-import com.zhonghcc.ltrpc.protocal.LtRpcRawRequest;
-import com.zhonghcc.ltrpc.protocal.LtRpcRequest;
-import com.zhonghcc.ltrpc.protocal.LtRpcResponse;
+import com.zhonghcc.ltrpc.protocal.*;
 import com.zhonghcc.ltrpc.protocal.serializer.LtRpcMessageWrapper;
 import com.zhonghcc.ltrpc.protocal.serializer.LtRpcSerializer;
 import com.zhonghcc.ltrpc.protocal.serializer.ProtostuffMessageWrapper;
@@ -26,7 +23,7 @@ public class OkHttpSender implements LtRpcSender {
         OkHttpClient client = new OkHttpClient();
 
         LtRpcRawRequest rawRequest = wrapper.serialize(rpcRequest);
-        LtRpcResponse rpcResponse = new LtRpcResponse();
+        LtRpcRawResponse rawResponse = new LtRpcRawResponse();
         RequestBody body = RequestBody.create(rawRequest.getData());
         Request request = new Request.Builder()
                 .url("http://" + node.getHost() + ":" + node.getPort() + "/")
@@ -37,19 +34,23 @@ public class OkHttpSender implements LtRpcSender {
                 .addHeader(LtRpcMessage.FIELD_AUTH_SIGN, rawRequest.getAuthSign())
                 .build();
         try {
-            Response response = client.newCall(request).execute();
-            byte[] responseData = response.body().bytes();
+            Response httpResponse = client.newCall(request).execute();
+            byte[] responseData = httpResponse.body().bytes();
 
-            rpcResponse.setData(responseData);
-            rpcResponse.setTraceId(response.header(LtRpcMessage.FIELD_TRACE_ID));
-            rpcResponse.setMsg(response.header(LtRpcMessage.FIELD_MSG));
-            rpcResponse.setSuccess(Boolean.getBoolean(response.header(LtRpcMessage.FIELD_SUCCESS)));
-            return rpcResponse;
+            rawResponse.setData(responseData);
+            rawResponse.setTraceId(httpResponse.header(LtRpcMessage.FIELD_TRACE_ID));
+            rawResponse.setMsg(httpResponse.header(LtRpcMessage.FIELD_MSG));
+            //TODO success false
+            rawResponse.setSuccess(Boolean.getBoolean(httpResponse.header(LtRpcMessage.FIELD_SUCCESS)));
+            //TODO wrapper interface
+            LtRpcResponse response = wrapper.deserialize(rawResponse,String.class);
+            return response;
         } catch (IOException e) {
             log.error("request error exception {}", Throwables.getStackTraceAsString(e));
-            rpcResponse.setMsg(e.getMessage());
-            rpcResponse.setSuccess(false);
-            return rpcResponse;
+            LtRpcResponse response = new LtRpcResponse();
+            response.setMsg(e.getMessage());
+            response.setSuccess(false);
+            return response;
         }
     }
     public static void main(String[] args){

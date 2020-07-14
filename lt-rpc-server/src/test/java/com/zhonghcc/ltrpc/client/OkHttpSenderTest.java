@@ -1,12 +1,9 @@
 package com.zhonghcc.ltrpc.client;
 
-import com.zhonghcc.ltrpc.protocal.LtRpcProtostuffProcessor;
 import com.zhonghcc.ltrpc.protocal.LtRpcRequest;
 import com.zhonghcc.ltrpc.protocal.LtRpcResponse;
 import com.zhonghcc.ltrpc.register.LtRpcNode;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class OkHttpSenderTest {
 

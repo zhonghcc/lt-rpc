@@ -90,23 +90,24 @@ public class UndertowHttpServer implements LtRpcServer{
                         ByteBufferPool byteBufferPool = exchange.getConnection().getByteBufferPool();
                         ByteBuffer byteBuffer = byteBufferPool.allocate().getBuffer();
                         int pos = byteBuffer.position();
-                        LtRpcRequest ltRpcRequest = new LtRpcRequest();
                         HeaderMap headerMap = exchange.getRequestHeaders();
                         String methodName = headerMap.getFirst(LtRpcMessage.FIELD_METHOD_NAME);
                         String traceId = headerMap.getFirst(LtRpcMessage.FIELD_TRACE_ID);
-                        ltRpcRequest.setMethodName(methodName);
-                        ltRpcRequest.setTraceId(traceId);
                         exchange.getRequestChannel().read(byteBuffer);
                         byte[] requestData = new byte[pos];
                         byteBuffer.get(requestData);
-                        ltRpcRequest.setData(requestData);
-                        LtRpcResponse ltRpcResponse = processor.processRpc(ltRpcRequest);
+                        LtRpcRawRequest ltRpcRequest = LtRpcRawRequest.builder()
+                                .methodName(methodName)
+                                .traceId(traceId)
+                                .data(requestData)
+                                .build();
+                        LtRpcRawResponse ltRpcResponse = processor.processRawRpc(ltRpcRequest);
                         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/ltrpc");
-                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_TRACE_ID),ltRpcResponse.getTraceId());
-                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_MSG),ltRpcResponse.getMsg());
-                        exchange.getRequestHeaders().put(new HttpString(LtRpcMessage.FIELD_SUCCESS),String.valueOf(ltRpcResponse.isSuccess()));
+                        exchange.getResponseHeaders().put(new HttpString(LtRpcMessage.FIELD_TRACE_ID),ltRpcResponse.getTraceId());
+                        exchange.getResponseHeaders().put(new HttpString(LtRpcMessage.FIELD_MSG),ltRpcResponse.getMsg());
+                        exchange.getResponseHeaders().put(new HttpString(LtRpcMessage.FIELD_SUCCESS),String.valueOf(ltRpcResponse.isSuccess()));
                         exchange.getResponseSender().send(ByteBuffer.wrap(ltRpcResponse.getData()));
-                        log.info("done {}", i);
+                        log.info("done {},{}", i,ltRpcResponse);
                     }
                 }
                 ).build();

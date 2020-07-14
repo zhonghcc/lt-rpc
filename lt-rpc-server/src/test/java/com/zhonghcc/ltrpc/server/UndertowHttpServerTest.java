@@ -1,11 +1,10 @@
 package com.zhonghcc.ltrpc.server;
 
 import com.zhonghcc.ltrpc.protocal.LtRpcProcessor;
-import com.zhonghcc.ltrpc.protocal.LtRpcProtostuffProcessor;
+import com.zhonghcc.ltrpc.protocal.LtRpcCommonProcessor;
+import com.zhonghcc.ltrpc.protocal.serializer.ProtostuffMessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 @Slf4j
 public class UndertowHttpServerTest {
@@ -18,7 +17,8 @@ public class UndertowHttpServerTest {
                 return "echo "+a;
             }
         }
-        LtRpcProcessor processor = new LtRpcProtostuffProcessor();
+        LtRpcProcessor processor = new LtRpcCommonProcessor();
+        processor.injectMessageWrapper(new ProtostuffMessageWrapper());
         processor.injectServerImpl(new ServerProxyImpl());
         LtRpcServer ltRpcServer = new UndertowHttpServer(8080,processor);
         ltRpcServer.start();
