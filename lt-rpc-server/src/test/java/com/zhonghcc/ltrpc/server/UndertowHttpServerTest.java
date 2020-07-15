@@ -1,5 +1,6 @@
 package com.zhonghcc.ltrpc.server;
 
+import com.zhonghcc.ltrpc.TestService;
 import com.zhonghcc.ltrpc.protocal.LtRpcProcessor;
 import com.zhonghcc.ltrpc.protocal.LtRpcCommonProcessor;
 import com.zhonghcc.ltrpc.protocal.serializer.ProtostuffMessageWrapper;
@@ -11,8 +12,8 @@ public class UndertowHttpServerTest {
 
     @Test
     public void start() {
-        class ServerProxyImpl{
-            public String test(String a){
+        class ServerProxyImpl implements TestService {
+            public String sayHello(String a){
                 log.info("call test {}",a);
                 return "echo "+a;
             }
