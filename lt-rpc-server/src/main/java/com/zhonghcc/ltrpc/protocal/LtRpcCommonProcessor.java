@@ -3,6 +3,7 @@ package com.zhonghcc.ltrpc.protocal;
 import com.google.common.base.Throwables;
 import com.zhonghcc.ltrpc.protocal.serializer.LtRpcMessageWrapper;
 import com.zhonghcc.ltrpc.protocal.serializer.LtRpcSerializer;
+import com.zhonghcc.ltrpc.trace.TraceLocal;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtobufIOUtil;
 import io.protostuff.ProtostuffIOUtil;
@@ -56,6 +57,8 @@ public class LtRpcCommonProcessor implements LtRpcProcessor{
     @Override
     public LtRpcRawResponse processRawRpc(LtRpcRawRequest rawRequest){
         String methodName = rawRequest.getMethodName();
+        String traceId = rawRequest.getTraceId();
+        TraceLocal.setTraceId(traceId);
         if(methodMap.containsKey(methodName)) {
             Method method = methodMap.get(methodName);
             Class paramType = method.getParameterTypes()[0];
