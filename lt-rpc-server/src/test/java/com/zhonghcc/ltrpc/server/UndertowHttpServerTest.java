@@ -31,9 +31,11 @@ public class UndertowHttpServerTest {
                 return "echo "+hello;
             }
         }
+
+        TestService impl = new ServerProxyImpl();
         LtRpcProcessor processor = new LtRpcCommonProcessor();
         processor.injectMessageWrapper(new ProtostuffMessageWrapper());
-        processor.injectServerImpl(new ServerProxyImpl());
+        processor.injectServerImpl(impl);
 
         LtRpcNodeRegister nodeRegister = new ZkRegister();
 
@@ -41,6 +43,8 @@ public class UndertowHttpServerTest {
         ltRpcServer.setPort(8080);
         ltRpcServer.setProcessor(processor);
         ltRpcServer.setNodeRegister(nodeRegister);
+        ltRpcServer.setServiceInterface(TestService.class);
+        ltRpcServer.setServiceImpl(impl);
 
         ltRpcServer.start();
         while(true){
