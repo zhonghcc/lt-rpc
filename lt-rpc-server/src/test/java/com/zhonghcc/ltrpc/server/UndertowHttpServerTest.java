@@ -40,7 +40,7 @@ public class UndertowHttpServerTest {
         LtRpcNodeRegister nodeRegister = new ZkRegister();
 
         UndertowHttpServer ltRpcServer = new UndertowHttpServer();
-        ltRpcServer.setPort(8080);
+        ltRpcServer.setPort(8888);
         ltRpcServer.setProcessor(processor);
         ltRpcServer.setNodeRegister(nodeRegister);
         ltRpcServer.setServiceInterface(TestService.class);

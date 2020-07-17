@@ -45,8 +45,8 @@ public abstract class AbstractRpcServer implements LtRpcServer{
 
     private void registerNode() {
         LtRpcNode node = new LtRpcNode();
-        node.setImplementClass(serviceImpl.getClass());
-        node.setInterfaceClass(serviceInterface);
+        node.setImplementClass(serviceImpl.getClass().getName());
+        node.setInterfaceClass(serviceInterface.getName());
         node.setPort(port);
 
         InetAddress ip4 = null;
