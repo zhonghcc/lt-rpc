@@ -9,6 +9,10 @@ public class ZkCommonClient {
     public static String ROOT_PATH="/services";
     private static CuratorFramework instance;
 
+    public static String getInterfacePath(String interfaceClass){
+        return ROOT_PATH+"/"+interfaceClass;
+    }
+
     public static synchronized CuratorFramework getClient(){
         if(instance==null){
             RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);

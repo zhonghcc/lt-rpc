@@ -25,7 +25,7 @@ public class ZkRegister implements LtRpcNodeRegister {
 //                String ret = ZkCommonClient.getClient().create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(ZkCommonClient.ROOT_PATH);
 //                log.info("create parent path ret={}",ret);
 //            }
-            String parentPath =ZkCommonClient.ROOT_PATH + "/" + node.getInterfaceClass();
+            String parentPath =ZkCommonClient.getInterfacePath(node.getInterfaceClass());
             boolean parentExist = (ZkCommonClient.getClient().checkExists().forPath(parentPath)!=null);
             if(!parentExist){
                 String ret = ZkCommonClient.getClient().create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(parentPath);
@@ -50,16 +50,16 @@ public class ZkRegister implements LtRpcNodeRegister {
         }
     }
 
-    public static void main(String[] args){
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        CuratorFramework client = CuratorFrameworkFactory.newClient("127.0.0.1:2181", retryPolicy);
-        client.start();
-        try{
-            List<String> paths = client.getChildren().forPath("/");
-            log.info("paths={}",paths);
-
-        }catch (Exception e){
-            log.error("zkclient error {}", ExceptionUtils.getStackTrace(e));
-        }
-    }
+//    public static void main(String[] args){
+//        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+//        CuratorFramework client = CuratorFrameworkFactory.newClient("127.0.0.1:2181", retryPolicy);
+//        client.start();
+//        try{
+//            List<String> paths = client.getChildren().forPath("/");
+//            log.info("paths={}",paths);
+//
+//        }catch (Exception e){
+//            log.error("zkclient error {}", ExceptionUtils.getStackTrace(e));
+//        }
+//    }
 }
