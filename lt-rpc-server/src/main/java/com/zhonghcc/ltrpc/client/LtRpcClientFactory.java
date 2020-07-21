@@ -51,11 +51,19 @@ public class LtRpcClientFactory {
             List<LtRpcNode> nodes = ltRpcNodeFinder.findAvaliableNodes(interfaceClass);
             LtRpcNode chosedNode = loadBalanceStrategy.choseNode(nodes);
             log.info("chosedNode {}",chosedNode);
-            LtRpcResponse response = ltRpcSender.sendRpc(request, chosedNode);
+            LtRpcResponse response;
+            if(chosedNode!=null){
+                response = ltRpcSender.sendRpc(request, chosedNode);
+                log.info("after invoke {},traceId={},success={},message={}",
+                        method.getName(), response.getTraceId(), response.isSuccess(), response.getMsg());
+                return response.getData();
+            }else{
+                response = new LtRpcResponse();
+                response.setSuccess(false);
+                response.setMsg("no valid endpoint founded");
+                throw new RuntimeException("no valid endpoint founded");
+            }
 
-            log.info("after invoke {},traceId={},success={},message={}",
-                    method.getName(), response.getTraceId(), response.isSuccess(), response.getMsg());
-            return response.getData();
         }
 
     }

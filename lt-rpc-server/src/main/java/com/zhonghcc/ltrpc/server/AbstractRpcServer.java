@@ -3,6 +3,7 @@ package com.zhonghcc.ltrpc.server;
 import com.zhonghcc.ltrpc.protocal.LtRpcProcessor;
 import com.zhonghcc.ltrpc.register.LtRpcNode;
 import com.zhonghcc.ltrpc.register.LtRpcNodeRegister;
+import com.zhonghcc.ltrpc.utils.INetAddressUtil;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
@@ -51,7 +52,7 @@ public abstract class AbstractRpcServer implements LtRpcServer{
 
         InetAddress ip4 = null;
         try {
-            ip4 = Inet4Address.getLocalHost();
+            ip4 = INetAddressUtil.getLocalHostLANAddress();
         } catch (UnknownHostException e) {
             throw new RuntimeException("RpcServer Exception, unknown host ip");
         }
@@ -64,6 +65,7 @@ public abstract class AbstractRpcServer implements LtRpcServer{
         if(!ret){
             throw new RuntimeException("RpcServer Exception, register fail");
         }
+
     }
 
     protected abstract void startRpcServer();
