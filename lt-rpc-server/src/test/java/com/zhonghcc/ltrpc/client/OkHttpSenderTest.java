@@ -9,11 +9,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.junit.Test;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 public class OkHttpSenderTest {
 
     @Test
-    public void sendRpc()  {
+    public void sendRpc() throws InterruptedException {
 
 //        LtRpcSender sender = new OkHttpSender();
 //        LtRpcRequest request = new LtRpcRequest();
@@ -33,15 +38,21 @@ public class OkHttpSenderTest {
 //        System.out.println(response);
         TestService service = LtRpcClientFactory.getClient(TestService.class);
 
-        for(int i=0;i<100;i++) {
+        long start = System.currentTimeMillis();
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        for(int i=0;i<10000;i++) {
             try {
-                String ret = service.sayHello("hello");
-                System.out.println(ret);
-                Thread.sleep(3000);
+                final int b = i;
+                executor.submit(()->{
+                    String ret = service.sayHello("hello"+b);
+                    log.info(ret);
+                });
             }catch (Exception e){
                 log.error("exception {}", ExceptionUtils.getStackTrace(e));
             }
         }
+        executor.awaitTermination(300, TimeUnit.SECONDS);
+        log.info("total cost={}",System.currentTimeMillis()-start);
 
 
 

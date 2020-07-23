@@ -10,6 +10,9 @@ import com.zhonghcc.ltrpc.register.zk.ZkRegister;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Slf4j
 public class UndertowHttpServerTest {
 
@@ -18,7 +21,8 @@ public class UndertowHttpServerTest {
         class ServerProxyImpl implements TestService {
             public String sayHello(String a){
                 log.info("call test {}",a);
-                return "echo "+a;
+                i.incrementAndGet();
+                return "echo "+a ;
             }
         }
 
@@ -39,14 +43,18 @@ public class UndertowHttpServerTest {
 
         LtRpcNodeRegister nodeRegister = new ZkRegister();
 
-        UndertowHttpServer ltRpcServer = new UndertowHttpServer();
-        ltRpcServer.setPort(8888);
-        ltRpcServer.setProcessor(processor);
-        ltRpcServer.setNodeRegister(nodeRegister);
-        ltRpcServer.setServiceInterface(TestService.class);
-        ltRpcServer.setServiceImpl(impl);
+        for(int i=0;i<4;i++) {
+            Random random = new Random();
+            int port = 10000 + random.nextInt(100);
+            UndertowHttpServer ltRpcServer = new UndertowHttpServer();
+            ltRpcServer.setPort(port);
+            ltRpcServer.setProcessor(processor);
+            ltRpcServer.setNodeRegister(nodeRegister);
+            ltRpcServer.setServiceInterface(TestService.class);
+            ltRpcServer.setServiceImpl(impl);
 
-        ltRpcServer.start();
+            ltRpcServer.start();
+        }
         while(true){
             try {
                 Thread.sleep(50000L);

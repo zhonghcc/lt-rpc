@@ -34,10 +34,9 @@ public class LtRpcClientFactory {
         private Class interfaceClass;
         private LoadBalanceStrategy loadBalanceStrategy;
 
-
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            log.info("before invoke {}", method.getName());
+            log.debug("before invoke {}", method.getName());
             LtRpcRequest request = new LtRpcRequest();
             Class[] classes = method.getParameterTypes();
             if (classes != null && classes.length >= 1) {
@@ -50,11 +49,11 @@ public class LtRpcClientFactory {
             request.setAuthSign("");
             List<LtRpcNode> nodes = ltRpcNodeFinder.findAvaliableNodes(interfaceClass);
             LtRpcNode chosedNode = loadBalanceStrategy.choseNode(nodes);
-            log.info("chosedNode {}",chosedNode);
+            log.debug("chosedNode {}",chosedNode);
             LtRpcResponse response;
             if(chosedNode!=null){
                 response = ltRpcSender.sendRpc(request, chosedNode);
-                log.info("after invoke {},traceId={},success={},message={}",
+                log.debug("after invoke {},traceId={},success={},message={}",
                         method.getName(), response.getTraceId(), response.isSuccess(), response.getMsg());
                 return response.getData();
             }else{
