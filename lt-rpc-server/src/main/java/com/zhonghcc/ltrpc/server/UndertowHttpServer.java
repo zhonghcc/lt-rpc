@@ -33,7 +33,7 @@ import static io.undertow.UndertowOptions.ENABLE_HTTP2;
 @Setter
 public class UndertowHttpServer extends AbstractRpcServer{
 
-    private final static String DEFAULT_HOST = "localhost";
+    private final static String DEFAULT_HOST = "0.0.0.0";
     private final static int DEFAULT_IO_NUM = 4;
     private final static int DEFAULT_WORKER_NUM = 1;
     private final static int DEFAULT_TIMEOUT = 600;
